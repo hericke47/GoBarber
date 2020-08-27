@@ -29,8 +29,8 @@ describe('SendForgotPasswordEmail', () => {
         const { token } = await fakeUserTokensRepository.generate(user.id);
 
         await resetPassword.execute({
-            password: '123123',
             token,
+            password: '123123',
         });
 
         const updatedUser = await fakeUsersRepository.findById(user.id);
