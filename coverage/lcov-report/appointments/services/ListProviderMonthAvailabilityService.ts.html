@@ -25,14 +25,14 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>60/60</span>
+                <span class='fraction'>64/64</span>
             </div>
         
             
             <div class='fl pad1y space-right2'>
-                <span class="strong">62.07% </span>
+                <span class="strong">62.71% </span>
                 <span class="quiet">Branches</span>
-                <span class='fraction'>36/58</span>
+                <span class='fraction'>37/59</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>60/60</span>
+                <span class='fraction'>64/64</span>
             </div>
         
             
@@ -117,7 +117,11 @@
 <a name='L58'></a><a href='#L58'>58</a>
 <a name='L59'></a><a href='#L59'>59</a>
 <a name='L60'></a><a href='#L60'>60</a>
-<a name='L61'></a><a href='#L61'>61</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L61'></a><a href='#L61'>61</a>
+<a name='L62'></a><a href='#L62'>62</a>
+<a name='L63'></a><a href='#L63'>63</a>
+<a name='L64'></a><a href='#L64'>64</a>
+<a name='L65'></a><a href='#L65'>65</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -162,14 +166,18 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-yes">31x</span>
-<span class="cline-any cline-yes">341x</span>
-<span class="cline-any cline-yes">31x</span>
-<span class="cline-any cline-yes">31x</span>
-<span class="cline-any cline-yes">31x</span>
-<span class="cline-any cline-yes">31x</span>
-<span class="cline-any cline-yes">31x</span>
-<span class="cline-any cline-yes">31x</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-yes">360x</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-yes">30x</span>
+<span class="cline-any cline-yes">30x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -177,12 +185,12 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { injectable, inject } from 'tsyringe';
-import { getDaysInMonth, getDate } from 'date-fns';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { inject, injectable } from 'tsyringe';
 &nbsp;
-import IAppointmentsRepository from '../repositories/IAppointmentsRepository';
+import { getDaysInMonth, getDate, isAfter } from 'date-fns';
 &nbsp;
-/* eslint-disable camelcase */
+import IAppointmnentsRepository from '../repositories/IAppointmentsRepository';
+&nbsp;
 interface IRequest {
     provider_id: string;
     month: number;
@@ -198,37 +206,41 @@ type IResponse = Array&lt;{
 class ListProviderMonthAvailabilityService {
     constructor(
         @inject('AppointmentsRepository')
-        private appointmentsRepository: IAppointmentsRepository,
+        private appointmentsRespository: IAppointmnentsRepository,
     ) {}
 &nbsp;
     public async execute({
         provider_id,
-        year,
         month,
+        year,
     }: IRequest): Promise&lt;IResponse&gt; {
-        const appointments = await this.appointmentsRepository.findAllInMonthFromProvider(
-            {
-                provider_id,
-                year,
-                month,
-            },
-        );
-&nbsp;
-        const numberOfDaysInMonth = getDaysInMonth(new Date(year, month - 1));
+        const numbersOfDaysInMonth = getDaysInMonth(new Date(year, month - 1));
 &nbsp;
         const eachDayArray = Array.from(
-            { length: numberOfDaysInMonth },
+            { length: numbersOfDaysInMonth },
             (_, index) =&gt; index + 1,
         );
 &nbsp;
+        const appointments = await this.appointmentsRespository.findAllInMonthFromProvider(
+            {
+                month,
+                year,
+                provider_id,
+            },
+        );
+&nbsp;
         const availability = eachDayArray.map(day =&gt; {
+            const compareDate = new Date(year, month - 1, day, 23, 59, 59);
+&nbsp;
             const appointmentsInDay = appointments.filter(appointment =&gt; {
-                return getDate(appointment.date) === day;
+                return getDate(appointment.date) === day; // getDate pega o dia da data que está passando.
             });
 &nbsp;
             return {
                 day,
-                available: appointmentsInDay.length &lt; 10,
+                available:
+                    isAfter(compareDate, new Date()) &amp;&amp;
+                    appointmentsInDay.length &lt; 10, // 8h até 17h cada agendamento tem uma hora
             };
         });
 &nbsp;
@@ -244,7 +256,7 @@ export default ListProviderMonthAvailabilityService;<span class="fstat-no" title
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Mon Oct 19 2020 20:03:41 GMT-0300 (GMT-03:00)
+                at Fri Nov 06 2020 22:33:48 GMT-0300 (GMT-03:00)
             </div>
         </div>
         <script src="../../prettify.js"></script>

@@ -25,7 +25,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Statements</span>
-                <span class='fraction'>68/68</span>
+                <span class='fraction'>69/69</span>
             </div>
         
             
@@ -46,7 +46,7 @@
             <div class='fl pad1y space-right2'>
                 <span class="strong">100% </span>
                 <span class="quiet">Lines</span>
-                <span class='fraction'>68/68</span>
+                <span class='fraction'>69/69</span>
             </div>
         
             
@@ -125,7 +125,8 @@
 <a name='L66'></a><a href='#L66'>66</a>
 <a name='L67'></a><a href='#L67'>67</a>
 <a name='L68'></a><a href='#L68'>68</a>
-<a name='L69'></a><a href='#L69'>69</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
+<a name='L69'></a><a href='#L69'>69</a>
+<a name='L70'></a><a href='#L70'>70</a></td><td class="line-coverage quiet"><span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -186,6 +187,7 @@
 <span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-yes">10x</span>
+<span class="cline-any cline-yes">10x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
@@ -193,17 +195,17 @@
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
 <span class="cline-any cline-yes">1x</span>
-<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { injectable, inject } from 'tsyringe';
-import { getHours, isAfter } from 'date-fns';
+<span class="cline-any cline-neutral">&nbsp;</span></td><td class="text"><pre class="prettyprint lang-js">import { inject, injectable } from 'tsyringe';
 &nbsp;
-import IAppointmentsRepository from '../repositories/IAppointmentsRepository';
+import { isAfter, getHours } from 'date-fns';
 &nbsp;
-/* eslint-disable camelcase */
+import IAppointmnentsRepository from '../repositories/IAppointmentsRepository';
+&nbsp;
 interface IRequest {
     provider_id: string;
     month: number;
-    day: number;
     year: number;
+    day: number;
 }
 &nbsp;
 type IResponse = Array&lt;{
@@ -212,19 +214,19 @@ type IResponse = Array&lt;{
 }&gt;;
 &nbsp;
 @injectable()
-class ListProviderDayAvailabilityService {
+class ListProviderMonthAvailabilityService {
     constructor(
         @inject('AppointmentsRepository')
-        private appointmentsRepository: IAppointmentsRepository,
+        private appointmentsRespository: IAppointmnentsRepository,
     ) {}
 &nbsp;
     public async execute({
         provider_id,
-        year,
         month,
+        year,
         day,
     }: IRequest): Promise&lt;IResponse&gt; {
-        const appointments = await this.appointmentsRepository.findAllInDayFromProvider(
+        const appointments = await this.appointmentsRespository.findAllInDayFromProvider(
             {
                 provider_id,
                 year,
@@ -235,18 +237,19 @@ class ListProviderDayAvailabilityService {
 &nbsp;
         const hourStart = 8;
 &nbsp;
-        const eachHourArray = Array.from(
-            { length: 10 },
+        const eachHoursArray = Array.from(
+            {
+                length: 10, // Quantidade de horarios no dia.
+            },
             (_, index) =&gt; index + hourStart,
         );
 &nbsp;
-        const currentDate = new Date(Date.now());
-&nbsp;
-        const availability = eachHourArray.map(hour =&gt; {
+        const availability = eachHoursArray.map(hour =&gt; {
             const hasAppointmentInHour = appointments.find(
                 appointment =&gt; getHours(appointment.date) === hour,
             );
 &nbsp;
+            const currentDate = new Date(Date.now());
             const compareDate = new Date(year, month - 1, day, hour);
 &nbsp;
             return {
@@ -260,7 +263,7 @@ class ListProviderDayAvailabilityService {
     }
 }
 &nbsp;
-export default ListProviderDayAvailabilityService;<span class="fstat-no" title="function not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
+export default ListProviderMonthAvailabilityService;<span class="fstat-no" title="function not covered" ><span class="fstat-no" title="function not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ><span class="branch-0 cbranch-no" title="branch not covered" ></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span></span>
 &nbsp;</pre></td></tr></table></pre>
 
                 <div class='push'></div><!-- for sticky footer -->
@@ -268,7 +271,7 @@ export default ListProviderDayAvailabilityService;<span class="fstat-no" title="
             <div class='footer quiet pad2 space-top1 center small'>
                 Code coverage generated by
                 <a href="https://istanbul.js.org/" target="_blank">istanbul</a>
-                at Mon Oct 19 2020 20:03:41 GMT-0300 (GMT-03:00)
+                at Fri Nov 06 2020 22:33:48 GMT-0300 (GMT-03:00)
             </div>
         </div>
         <script src="../../prettify.js"></script>
