@@ -1,17 +1,17 @@
-import 'reflect-metadata';
 import FakeCacheProvider from '@shared/container/providers/CacheProvider/fakes/FakeCacheProvider';
 import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
 import ListProvidersService from './ListProvidersService';
 
-let fakeCacheProvider: FakeCacheProvider;
 let fakeUsersRepository: FakeUsersRepository;
-let listProvidersServices: ListProvidersService;
+let fakeCacheProvider: FakeCacheProvider;
+let listProviders: ListProvidersService;
 
-describe('ListProvidersService', () => {
+describe('ListProviders', () => {
     beforeEach(() => {
-        fakeCacheProvider = new FakeCacheProvider();
         fakeUsersRepository = new FakeUsersRepository();
-        listProvidersServices = new ListProvidersService(
+        fakeCacheProvider = new FakeCacheProvider();
+
+        listProviders = new ListProvidersService(
             fakeUsersRepository,
             fakeCacheProvider,
         );
@@ -19,24 +19,24 @@ describe('ListProvidersService', () => {
 
     it('should be able to list the providers', async () => {
         const user1 = await fakeUsersRepository.create({
-            name: 'Nelson',
-            email: 'nelson@golbarber.com',
+            name: 'John Doe',
+            email: 'johndoe@example.com',
             password: '123456',
         });
 
         const user2 = await fakeUsersRepository.create({
-            name: 'Nelson 1',
-            email: 'nelson@2golbarber.com',
+            name: 'John Trê',
+            email: 'johntre@example.com',
             password: '123456',
         });
 
         const loggedUser = await fakeUsersRepository.create({
-            name: 'Nelson 3',
-            email: 'nelson@3golbarber.com',
+            name: 'John Qua',
+            email: 'johnqua@example.com',
             password: '123456',
         });
 
-        const providers = await listProvidersServices.execute({
+        const providers = await listProviders.execute({
             user_id: loggedUser.id,
         });
 

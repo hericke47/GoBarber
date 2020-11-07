@@ -9,10 +9,8 @@ export default class ProviderAppointmentsController {
         request: Request,
         response: Response,
     ): Promise<Response> {
-        // vem atraves do middleware de autenticacao
         const provider_id = request.user.id;
         const { day, month, year } = request.query;
-        // query -> sempre vem como string, por isso precisamos transformar para number
 
         const listProviderAppointments = container.resolve(
             ListProviderAppointmentsService,

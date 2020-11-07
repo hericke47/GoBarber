@@ -1,4 +1,4 @@
-import { inject, injectable } from 'tsyringe';
+import { injectable, inject } from 'tsyringe';
 
 import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
 import IUsersRepository from '@modules/users/repositories/IUsersRepository';
@@ -25,14 +25,10 @@ class ListProvidersService {
             `providers-list:${user_id}`,
         );
 
-        // let users;
-
         if (!users) {
             users = await this.usersRepository.findAllProviders({
                 except_user_id: user_id,
             });
-
-            // console.log('A query no banco foi realizada!');
 
             await this.cacheProvider.save(
                 `providers-list:${user_id}`,

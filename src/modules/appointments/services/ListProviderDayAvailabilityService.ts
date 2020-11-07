@@ -1,14 +1,13 @@
-import { inject, injectable } from 'tsyringe';
+import { injectable, inject } from 'tsyringe';
+import { getHours, isAfter } from 'date-fns';
 
-import { isAfter, getHours } from 'date-fns';
-
-import IAppointmnentsRepository from '../repositories/IAppointmentsRepository';
+import IAppointmentsRepository from '../repositories/IAppointmentsRepository';
 
 interface IRequest {
     provider_id: string;
+    day: number;
     month: number;
     year: number;
-    day: number;
 }
 
 type IResponse = Array<{
@@ -17,19 +16,19 @@ type IResponse = Array<{
 }>;
 
 @injectable()
-class ListProviderMonthAvailabilityService {
+class ListProviderDayAvailabilityService {
     constructor(
         @inject('AppointmentsRepository')
-        private appointmentsRespository: IAppointmnentsRepository,
+        private appointmentsRepository: IAppointmentsRepository,
     ) {}
 
     public async execute({
         provider_id,
-        month,
         year,
+        month,
         day,
     }: IRequest): Promise<IResponse> {
-        const appointments = await this.appointmentsRespository.findAllInDayFromProvider(
+        const appointments = await this.appointmentsRepository.findAllInDayFromProvider(
             {
                 provider_id,
                 year,
@@ -40,19 +39,18 @@ class ListProviderMonthAvailabilityService {
 
         const hourStart = 8;
 
-        const eachHoursArray = Array.from(
-            {
-                length: 10, // Quantidade de horarios no dia.
-            },
+        const eachHourArray = Array.from(
+            { length: 10 },
             (_, index) => index + hourStart,
         );
 
-        const availability = eachHoursArray.map(hour => {
+        const currentDate = new Date(Date.now());
+
+        const availability = eachHourArray.map(hour => {
             const hasAppointmentInHour = appointments.find(
                 appointment => getHours(appointment.date) === hour,
             );
 
-            const currentDate = new Date(Date.now());
             const compareDate = new Date(year, month - 1, day, hour);
 
             return {
@@ -66,4 +64,4 @@ class ListProviderMonthAvailabilityService {
     }
 }
 
-export default ListProviderMonthAvailabilityService;
+export default ListProviderDayAvailabilityService;

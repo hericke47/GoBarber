@@ -1,4 +1,4 @@
-import { inject, injectable } from 'tsyringe';
+import { injectable, inject } from 'tsyringe';
 
 import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
 import { classToClass } from 'class-transformer';
@@ -43,8 +43,6 @@ class ListProviderAppointmentsService {
                     day,
                 },
             );
-
-            // console.log('buscou do banco');
 
             await this.cacheProvider.save(cacheKey, classToClass(appointments));
         }

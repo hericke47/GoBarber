@@ -30,7 +30,6 @@ class AppointmentsRepository implements IAppointmentsRepository {
         month,
         year,
     }: IFindAllInMonthFromProviderDTO): Promise<Appointment[]> {
-        // 1 - 01
         const parsedMonth = String(month).padStart(2, '0');
 
         const appointments = await this.ormRepository.find({
@@ -52,9 +51,7 @@ class AppointmentsRepository implements IAppointmentsRepository {
         month,
         year,
     }: IFindAllInDayFromProviderDTO): Promise<Appointment[]> {
-        // 1 - 01
         const parsedDay = String(day).padStart(2, '0');
-        // 1 - 01
         const parsedMonth = String(month).padStart(2, '0');
 
         const appointments = await this.ormRepository.find({
@@ -65,7 +62,7 @@ class AppointmentsRepository implements IAppointmentsRepository {
                         `to_char(${dateFieldName}, 'DD-MM-YYYY') = '${parsedDay}-${parsedMonth}-${year}'`,
                 ),
             },
-            relations: ['user'], // estratégia de eager loading
+            relations: ['user'],
         });
 
         return appointments;

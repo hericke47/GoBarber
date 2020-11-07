@@ -6,25 +6,18 @@ import AppointmentsController from '../controllers/AppointmentsController';
 import ProviderAppointmentsController from '../controllers/ProviderAppointmentsController';
 
 const appointmentsRouter = Router();
-
-appointmentsRouter.use(ensureAuthenticated);
-
-// appointmentsRouter.get('/', async (req, res) => {
-//   const appointments = await appointmentsRepository.find();
-
-//   return res.json(appointments);
-// });
-
 const appointmentsController = new AppointmentsController();
 const providerAppointmentsController = new ProviderAppointmentsController();
+
+appointmentsRouter.use(ensureAuthenticated);
 
 appointmentsRouter.post(
     '/',
     celebrate({
-        [Segments.BODY]: Joi.object().keys({
+        [Segments.BODY]: {
             provider_id: Joi.string().uuid().required(),
             date: Joi.date(),
-        }),
+        },
     }),
     appointmentsController.create,
 );
