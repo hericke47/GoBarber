@@ -1,19 +1,15 @@
 import Redis, { Redis as RedisClient } from 'ioredis';
-
 import cacheConfig from '@config/cache';
-
 import ICacheProvider from '../models/ICacheProvider';
-import ISaveCacheDTO from '../dtos/ISaveCacheDTO';
 
 export default class RedisCacheProvider implements ICacheProvider {
     private client: RedisClient;
 
     constructor() {
-        const { redis: redisConfig } = cacheConfig.config;
-        this.client = new Redis(redisConfig);
+        this.client = new Redis(cacheConfig.config.redis);
     }
 
-    public async save({ key, value }: ISaveCacheDTO): Promise<void> {
+    public async save(key: string, value: any): Promise<void> {
         await this.client.set(key, JSON.stringify(value));
     }
 
@@ -24,7 +20,9 @@ export default class RedisCacheProvider implements ICacheProvider {
             return null;
         }
 
-        return JSON.parse(data) as T;
+        const parsedData = JSON.parse(data) as T;
+
+        return parsedData;
     }
 
     public async invalidate(key: string): Promise<void> {
@@ -36,7 +34,9 @@ export default class RedisCacheProvider implements ICacheProvider {
 
         const pipeline = this.client.pipeline();
 
-        keys.forEach(key => pipeline.del(key));
+        keys.forEach(key => {
+            pipeline.del(key);
+        });
 
         await pipeline.exec();
     }

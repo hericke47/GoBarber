@@ -1,9 +1,10 @@
 import { inject, injectable } from 'tsyringe';
 
 import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
+import IUsersRepository from '@modules/users/repositories/IUsersRepository';
 
 import User from '@modules/users/infra/typeorm/entities/User';
-import IUsersRepository from '@modules/users/repositories/IUsersRepository';
+import { classToClass } from 'class-transformer';
 
 interface IRequest {
     user_id: string;
@@ -20,22 +21,26 @@ class ListProvidersService {
     ) {}
 
     public async execute({ user_id }: IRequest): Promise<User[]> {
-        const CACHE_KEY = `providers-list:${user_id}`;
+        let users = await this.cacheProvider.recover<User[]>(
+            `providers-list:${user_id}`,
+        );
 
-        let providers = await this.cacheProvider.recover<User[]>(CACHE_KEY);
+        // let users;
 
-        if (!providers) {
-            providers = await this.usersRepository.findAllProviders({
+        if (!users) {
+            users = await this.usersRepository.findAllProviders({
                 except_user_id: user_id,
             });
 
-            this.cacheProvider.save({
-                key: CACHE_KEY,
-                value: providers,
-            });
+            // console.log('A query no banco foi realizada!');
+
+            await this.cacheProvider.save(
+                `providers-list:${user_id}`,
+                classToClass(users),
+            );
         }
 
-        return providers;
+        return users;
     }
 }
 

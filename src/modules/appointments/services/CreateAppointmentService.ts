@@ -1,14 +1,12 @@
-import { injectable, inject } from 'tsyringe';
 import { startOfHour, isBefore, getHours, format } from 'date-fns';
-
-import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
-
-import Appointment from '@modules/appointments/infra/typeorm/entities/Appointment';
-import IAppointmentsRepository from '@modules/appointments/repositories/IAppointmentsRepository';
-
-import INotificationsRepository from '@modules/notifications/repositories/INotificationsRepository';
+import { injectable, inject } from 'tsyringe';
 
 import AppError from '@shared/errors/AppError';
+
+import INotificationsRepository from '@modules/notifications/repositories/INotificationsRepository';
+import ICacheProvider from '@shared/container/providers/CacheProvider/models/ICacheProvider';
+import Appointment from '../infra/typeorm/entities/Appointment';
+import IAppointmentsRepository from '../repositories/IAppointmentsRepository';
 
 interface IRequest {
     provider_id: string;
@@ -20,68 +18,71 @@ interface IRequest {
 class CreateAppointmentService {
     constructor(
         @inject('AppointmentsRepository')
-        private appointmentRepository: IAppointmentsRepository,
+        private appointmentsRepository: IAppointmentsRepository,
+
         @inject('NotificationsRepository')
         private notificationsRepository: INotificationsRepository,
+
         @inject('CacheProvider')
         private cacheProvider: ICacheProvider,
     ) {}
 
     public async execute({
-        date,
         provider_id,
         user_id,
+        date,
     }: IRequest): Promise<Appointment> {
-        if (user_id === provider_id) {
-            throw new AppError("You can't create an appointment to your self");
-        }
-
         const appointmentDate = startOfHour(date);
 
-        if (isBefore(date, Date.now())) {
-            throw new AppError("You can't create an appointment on pass date");
-        }
-
-        /**
-         * Verificar se o hora do agendamente está no range disponivel do provedor.
-         */
-        const appointmentHour = getHours(appointmentDate);
-        if (appointmentHour < 8 || appointmentHour > 18) {
+        if (isBefore(appointmentDate, Date.now())) {
             throw new AppError(
-                "You can't create an appointment before 8 or after 8pm",
+                "You can't create an appointment on a past date",
             );
         }
 
-        const findAppointmentInSameDate = await this.appointmentRepository.findByDate(
-            { date: appointmentDate, provider_id },
+        if (user_id === provider_id) {
+            throw new AppError("You can't create an appointment with yourself");
+        }
+
+        if (getHours(appointmentDate) < 8 || getHours(appointmentDate) > 17) {
+            throw new AppError(
+                'You can only create appointments between 8am and 5pm',
+            );
+        }
+
+        const findAppointmentInSameDate = await this.appointmentsRepository.findByDate(
+            appointmentDate,
+            provider_id,
         );
 
         if (findAppointmentInSameDate) {
             throw new AppError('This appointment is already booked');
         }
 
-        const appointment = await this.appointmentRepository.create({
+        const appointment = await this.appointmentsRepository.create({
             provider_id,
             user_id,
             date: appointmentDate,
         });
 
-        const dateFormatted = format(
-            appointmentDate,
-            "dd/MM/yyyy 'às' HH:mm'h'",
-        );
+        // data formatada
+        const dateFormated = format(appointmentDate, "dd/MM/yyyy 'às' HH'h'mm");
 
         await this.notificationsRepository.create({
             recipient_id: provider_id,
-            content: `Novo agendamento para o dia ${dateFormatted}.`,
+            content: `Novo agendamento para dia ${dateFormated}`,
         });
 
-        this.cacheProvider.invalidate(
-            `provider-appointments:${provider_id}:${format(date, 'yyyy-M-d')}`,
+        await this.cacheProvider.invalidate(
+            `provider-appointments:${provider_id}:${format(
+                appointmentDate,
+                'yyyy-M-d',
+            )}`,
         );
-
         return appointment;
     }
 }
 
 export default CreateAppointmentService;
+// Tem apenas um único metodo dentro dele -> EXECUTE ou RUN
+// 'Estou executando a criação de um novo Appointment
