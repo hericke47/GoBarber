@@ -10,11 +10,12 @@ export default class ProvidersController {
     ): Promise<Response> {
         const user_id = request.user.id;
 
-        const listProviders = container.resolve(ListProvidersService);
+        const listProvidersService = container.resolve(ListProvidersService);
 
-        const providers = await listProviders.execute({
+        const providers = await listProvidersService.execute({
             user_id,
         });
+
         return response.json(providers);
     }
 }

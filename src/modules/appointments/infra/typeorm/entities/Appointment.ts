@@ -1,7 +1,7 @@
 import {
     Entity,
-    PrimaryGeneratedColumn,
     Column,
+    PrimaryGeneratedColumn,
     CreateDateColumn,
     UpdateDateColumn,
     ManyToOne,
@@ -29,7 +29,7 @@ class Appointment {
     @JoinColumn({ name: 'user_id' })
     user: User;
 
-    @Column('timestamp with time zone')
+    @Column('time with time zone')
     date: Date;
 
     @CreateDateColumn()

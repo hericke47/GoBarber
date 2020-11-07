@@ -2,10 +2,11 @@ import { getRepository, Repository, Raw } from 'typeorm';
 
 import IAppointmentsRepository from '@modules/appointments/repositories/IAppointmentsRepository';
 import ICreateAppointmentDTO from '@modules/appointments/dtos/ICreateAppointmentDTO';
+
+import Appointment from '@modules/appointments/infra/typeorm/entities/Appointment';
 import IFindAllInMonthFromProviderDTO from '@modules/appointments/dtos/IFindAllInMonthFromProviderDTO';
 import IFindAllInDayFromProviderDTO from '@modules/appointments/dtos/IFindAllInDayFromProviderDTO';
-
-import Appointment from '../entities/Appointment';
+import IFindAppointmentByDateDTO from '@modules/appointments/dtos/IFindAppointmentByDateDTO';
 
 class AppointmentsRepository implements IAppointmentsRepository {
     private ormRepository: Repository<Appointment>;
@@ -14,10 +15,26 @@ class AppointmentsRepository implements IAppointmentsRepository {
         this.ormRepository = getRepository(Appointment);
     }
 
-    public async findByDate(
-        date: Date,
-        provider_id: string,
-    ): Promise<Appointment | undefined> {
+    public async create({
+        provider_id,
+        date,
+        user_id,
+    }: ICreateAppointmentDTO): Promise<Appointment> {
+        const appointment = this.ormRepository.create({
+            provider_id,
+            date,
+            user_id,
+        });
+
+        await this.ormRepository.save(appointment);
+
+        return appointment;
+    }
+
+    public async findByDate({
+        date,
+        provider_id,
+    }: IFindAppointmentByDateDTO): Promise<Appointment | undefined> {
         const findAppointment = await this.ormRepository.findOne({
             where: { date, provider_id },
         });
@@ -47,9 +64,9 @@ class AppointmentsRepository implements IAppointmentsRepository {
 
     public async findAllInDayFromProvider({
         provider_id,
-        day,
         month,
         year,
+        day,
     }: IFindAllInDayFromProviderDTO): Promise<Appointment[]> {
         const parsedDay = String(day).padStart(2, '0');
         const parsedMonth = String(month).padStart(2, '0');
@@ -66,22 +83,6 @@ class AppointmentsRepository implements IAppointmentsRepository {
         });
 
         return appointments;
-    }
-
-    public async create({
-        provider_id,
-        user_id,
-        date,
-    }: ICreateAppointmentDTO): Promise<Appointment> {
-        const appointment = this.ormRepository.create({
-            provider_id,
-            user_id,
-            date,
-        });
-
-        await this.ormRepository.save(appointment);
-
-        return appointment;
     }
 }
 

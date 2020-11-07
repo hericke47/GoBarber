@@ -1,17 +1,17 @@
-import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
+import 'reflect-metadata';
 import FakeCacheProvider from '@shared/container/providers/CacheProvider/fakes/FakeCacheProvider';
+import FakeUsersRepository from '@modules/users/repositories/fakes/FakeUsersRepository';
 import ListProvidersService from './ListProvidersService';
 
-let fakeUsersRepository: FakeUsersRepository;
-let listProviders: ListProvidersService;
 let fakeCacheProvider: FakeCacheProvider;
+let fakeUsersRepository: FakeUsersRepository;
+let listProvidersServices: ListProvidersService;
 
-describe('ListProviders', () => {
+describe('ListProvidersService', () => {
     beforeEach(() => {
-        fakeUsersRepository = new FakeUsersRepository();
         fakeCacheProvider = new FakeCacheProvider();
-
-        listProviders = new ListProvidersService(
+        fakeUsersRepository = new FakeUsersRepository();
+        listProvidersServices = new ListProvidersService(
             fakeUsersRepository,
             fakeCacheProvider,
         );
@@ -19,24 +19,24 @@ describe('ListProviders', () => {
 
     it('should be able to list the providers', async () => {
         const user1 = await fakeUsersRepository.create({
-            name: 'John Doe',
-            email: 'johndoe@example.com',
+            name: 'Nelson',
+            email: 'nelson@golbarber.com',
             password: '123456',
         });
 
         const user2 = await fakeUsersRepository.create({
-            name: 'John Trê',
-            email: 'johntre@example.com',
+            name: 'Nelson 1',
+            email: 'nelson@2golbarber.com',
             password: '123456',
         });
 
         const loggedUser = await fakeUsersRepository.create({
-            name: 'John Qua',
-            email: 'johnqua@example.com',
+            name: 'Nelson 3',
+            email: 'nelson@3golbarber.com',
             password: '123456',
         });
 
-        const providers = await listProviders.execute({
+        const providers = await listProvidersServices.execute({
             user_id: loggedUser.id,
         });
 

@@ -14,7 +14,7 @@ export default {
 
     defaults: {
         from: {
-            email: 'herick.exterkoetter@planethub.dev',
+            email: 'herickherick47@gamil.com',
             name: 'Herick da planetHub',
         },
     },

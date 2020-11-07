@@ -1,21 +1,20 @@
 import { Router } from 'express';
 import { celebrate, Segments, Joi } from 'celebrate';
-
 import ensureAuthenticated from '@modules/users/infra/http/middleware/ensureAuthenticated';
 import ProvidersController from '../controllers/ProvidersController';
 import ProviderDayAvailabilityController from '../controllers/ProviderDayAvailabilityController';
 import ProviderMonthAvailabilityController from '../controllers/ProviderMonthAvailabilityController';
 
-const ProvidersRouter = Router();
+const providersRoutes = Router();
 const providersController = new ProvidersController();
-const providerMonthAvailabilityController = new ProviderMonthAvailabilityController();
 const providerDayAvailabilityController = new ProviderDayAvailabilityController();
+const providerMonthAvailabilityController = new ProviderMonthAvailabilityController();
 
-ProvidersRouter.use(ensureAuthenticated);
+providersRoutes.use(ensureAuthenticated);
 
-ProvidersRouter.get('/', providersController.index);
+providersRoutes.get('/', providersController.index);
 
-ProvidersRouter.get(
+providersRoutes.get(
     '/:provider_id/month-availability',
     celebrate({
         [Segments.PARAMS]: {
@@ -24,7 +23,8 @@ ProvidersRouter.get(
     }),
     providerMonthAvailabilityController.index,
 );
-ProvidersRouter.get(
+
+providersRoutes.get(
     '/:provider_id/day-availability',
     celebrate({
         [Segments.PARAMS]: {
@@ -34,4 +34,4 @@ ProvidersRouter.get(
     providerDayAvailabilityController.index,
 );
 
-export default ProvidersRouter;
+export default providersRoutes;
